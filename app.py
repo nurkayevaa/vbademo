@@ -8,15 +8,15 @@ import re
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 
-# Function to clean input code
-def clean_code(input_code):
+# Function to clean VBA code
+def clean_vba_code(vba_code):
     """
-    Cleans input code (VBA or WebFOCUS) by:
+    Cleans VBA code by:
     - Removing comments and blank lines.
     - Optionally truncating large blocks.
     """
-    # Remove comments (lines starting with ' or Rem for VBA, or -* for WebFOCUS)
-    code_without_comments = re.sub(r"^\s*('.*|Rem\s+.*|-\*.*)$", "", input_code, flags=re.MULTILINE)
+    # Remove comments (lines starting with ' or Rem)
+    code_without_comments = re.sub(r"^\s*('.*|Rem\s+.*)$", "", vba_code, flags=re.MULTILINE)
     
     # Remove blank lines
     cleaned_code = "\n".join([line for line in code_without_comments.splitlines() if line.strip()])
@@ -28,27 +28,25 @@ def clean_code(input_code):
     
     return cleaned_code
 
-
 # Streamlit app setup
-st.title("Code Translator: VBA/WebFOCUS to SQL")
-st.markdown("Paste your VBA or WebFOCUS code below to translate it to SQL Server language.")
+st.title("VBA to SQL Translator")
+st.markdown("Paste VBA code below to translate it to SQL Server language.")
 
-# Text input area for the code
-input_code = st.text_area("Enter Code:", height=300, placeholder="Paste your code here...")
+# Text input area for VBA code
+vba_code = st.text_area("Enter VBA Code:", height=300, placeholder="Paste your VBA code here...")
 
-# Button for VBA to SQL translation
-if st.button("Translate VBA to SQL"):
-    if input_code.strip():
+# Button to trigger translation
+if st.button("Translate to SQL"):
+    if vba_code.strip():
         with st.spinner("Translating VBA to SQL..."):
             for attempt in range(3):  # Retry logic
                 try:
                     # Clean the VBA code
-                    cleaned_code = clean_code(input_code)
-                    
+                    cleaned_code = clean_vba_code(vba_code)
                     # Prepare messages for the OpenAI ChatCompletion API
                     messages = [
                         {"role": "system", "content": "You are an expert in translating VBA code to SQL Server language."},
-                        {"role": "user", "content": f"Translate the following VBA code to SQL Server language:\n\n{cleaned_code}"}
+                        {"role": "user", "content": f"Translate the following VBA code to SQL Server language, show only SQL query:\n\n{vba_code}"}
                     ]
 
                     # Call OpenAI API using ChatCompletion
@@ -56,7 +54,7 @@ if st.button("Translate VBA to SQL"):
                         model="gpt-4",  # Or "gpt-3.5-turbo"
                         messages=messages,
                         temperature=0.2,
-                        max_tokens=3000
+                        max_tokens=1500
                     )
 
                     # Extract the SQL translation
@@ -74,45 +72,6 @@ if st.button("Translate VBA to SQL"):
                         st.error(f"Error after 3 attempts: {str(e)}")
     else:
         st.warning("Please enter VBA code before translating!")
-
-# Button for WebFOCUS to SQL translation
-if st.button("Translate WebFOCUS to SQL"):
-    if input_code.strip():
-        with st.spinner("Translating WebFOCUS to SQL..."):
-            for attempt in range(3):  # Retry logic
-                try:
-                    # Clean the WebFOCUS code
-                    cleaned_code = clean_code(input_code)
-                    
-                    # Prepare messages for the OpenAI ChatCompletion API
-                    messages = [
-                        {"role": "system", "content": "You are an expert in translating WebFOCUS code to SQL Server language."},
-                        {"role": "user", "content": f"Translate the following WebFOCUS code to SQL Server language:\n\n{cleaned_code}"}
-                    ]
-
-                    # Call OpenAI API using ChatCompletion
-                    response = openai.ChatCompletion.create(
-                        model="gpt-4",  # Or "gpt-3.5-turbo"
-                        messages=messages,
-                        temperature=0.2,
-                        max_tokens=3000
-                    )
-
-                    # Extract the SQL translation
-                    sql_translation = response["choices"][0]["message"]["content"].strip()
-
-                    # Display result
-                    st.success("Translation Complete!")
-                    st.text_area("SQL Translation:", sql_translation, height=300)
-                    break
-                except Exception as e:
-                    if attempt < 2:
-                        st.warning(f"Attempt {attempt + 1} failed. Retrying...")
-                        time.sleep(2)  # Wait before retrying
-                    else:
-                        st.error(f"Error after 3 attempts: {str(e)}")
-    else:
-        st.warning("Please enter WebFOCUS code before translating!")
 
 # Footer
 st.markdown("---")
