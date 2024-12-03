@@ -46,7 +46,7 @@ if st.button("Translate to SQL"):
                     # Prepare messages for the OpenAI ChatCompletion API
                     messages = [
                         {"role": "system", "content": "You are an expert in translating VBA code to SQL Server language."},
-                        {"role": "user", "content": f"Translate the following VBA code to SQL Server language:\n\n{vba_code}"}
+                        {"role": "user", "content": f"Translate the following VBA code to SQL Server language, show only SQL query:\n\n{vba_code}"}
                     ]
 
                     # Call OpenAI API using ChatCompletion
