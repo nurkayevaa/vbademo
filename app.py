@@ -4,7 +4,7 @@ import time
 
 # Configure OpenAI API
 openai.api_base = "https://api.openai.com/v1"
-openai.api_key = "your_actual_api_key"  # Replace with a valid key
+openai.api_key = st.secrets["OPENAI_API_KEY"] 
 
 # Streamlit app setup
 st.title("VBA to SQL Translator")
