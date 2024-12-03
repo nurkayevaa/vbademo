@@ -5,6 +5,27 @@ import time
 # Configure OpenAI API
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
+
+# Function to clean VBA code
+def clean_vba_code(vba_code):
+    """
+    Cleans VBA code by:
+    - Removing comments and blank lines.
+    - Optionally truncating large blocks.
+    """
+    # Remove comments (lines starting with ' or Rem)
+    code_without_comments = re.sub(r"^\s*('.*|Rem\s+.*)$", "", vba_code, flags=re.MULTILINE)
+    
+    # Remove blank lines
+    cleaned_code = "\n".join([line for line in code_without_comments.splitlines() if line.strip()])
+    
+    # Optional: Limit the length of input
+    max_lines = 100  # Keep only the first 100 lines if input is too long
+    if len(cleaned_code.splitlines()) > max_lines:
+        cleaned_code = "\n".join(cleaned_code.splitlines()[:max_lines]) + "\n'... Truncated for length"
+    
+    return cleaned_code
+
 # Streamlit app setup
 st.title("VBA to SQL Translator")
 st.markdown("Paste VBA code below to translate it to SQL Server language.")
