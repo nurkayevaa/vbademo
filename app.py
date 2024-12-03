@@ -3,8 +3,7 @@ import openai
 import time
 
 # Configure OpenAI API
-openai.api_base = "https://api.openai.com/v1"
-openai.api_key = st.secrets["OPENAI_API_KEY"] 
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 # Streamlit app setup
 st.title("VBA to SQL Translator")
@@ -19,19 +18,22 @@ if st.button("Translate to SQL"):
         with st.spinner("Translating VBA to SQL..."):
             for attempt in range(3):  # Retry logic
                 try:
-                    # Prepare prompt for the OpenAI model
-                    prompt = f"Translate the following VBA code to SQL Server language:\n\n{vba_code}"
+                    # Prepare messages for the OpenAI ChatCompletion API
+                    messages = [
+                        {"role": "system", "content": "You are an expert in translating VBA code to SQL Server language."},
+                        {"role": "user", "content": f"Translate the following VBA code to SQL Server language:\n\n{vba_code}"}
+                    ]
 
-                    # Call OpenAI API
-                    response = openai.Completion.create(
-                        model="gpt-4",  # Update model as needed
-                        prompt=prompt,
+                    # Call OpenAI API using ChatCompletion
+                    response = openai.ChatCompletion.create(
+                        model="gpt-4",  # Or "gpt-3.5-turbo"
+                        messages=messages,
                         temperature=0.2,
                         max_tokens=1500
                     )
 
                     # Extract the SQL translation
-                    sql_translation = response.get("choices", [])[0].get("text", "").strip()
+                    sql_translation = response["choices"][0]["message"]["content"].strip()
 
                     # Display result
                     st.success("Translation Complete!")
