@@ -39,6 +39,8 @@ if st.button("Translate to SQL"):
         with st.spinner("Translating VBA to SQL..."):
             for attempt in range(3):  # Retry logic
                 try:
+                    # Clean the VBA code
+                    cleaned_code = clean_vba_code(vba_code)
                     # Prepare messages for the OpenAI ChatCompletion API
                     messages = [
                         {"role": "system", "content": "You are an expert in translating VBA code to SQL Server language."},
